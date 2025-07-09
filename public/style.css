@@ -63,14 +63,25 @@ body {
 
 header {
   text-align: center;
+  display: flex;
+  align-items: center;
   margin-bottom: 30px;
   padding: 20px 0;
+  justify-content: center;
   border-bottom: 1px solid var(--border-color);
 }
 
 header h1 {
-  color: var(--header-color);
-  font-weight: 600;
+    color: var(--header-color);
+    font-weight: 600;
+    margin-left: 15px; /* Adiciona um espaço entre a imagem e o título (ajuste conforme necessário) */
+    margin-bottom: 0; /* Remove a margem inferior padrão do h1 */
+}
+
+.logo {
+    height: 40px; /* Define a altura da imagem (ajuste conforme necessário) */
+    width: auto; /* Mantém a proporção da imagem */
+    margin-right: 15px; /* Adiciona um espaço entre a imagem e o título se a imagem vier antes */
 }
 
 /* ==============================================
@@ -89,8 +100,8 @@ header h1 {
   background: var(--card-bg);
   border-radius: 10px;
   padding: 25px;
-  padding-bottom: 15px;
   padding-top: 15px;
+  padding-bottom: 15px;
   box-shadow: 0 4px 12px var(--shadow-color);
   margin-bottom: 10px;
   position: relative;
