@@ -6,4 +6,4 @@ Run by
 
 or simply
 
-`docker run -p 3000:3000 --name=simple-notes --restart unless-stopped bartche/simple-notes`
+`docker run -d -p 3000:3000 --name=simple-notes --restart unless-stopped bartche/simple-notes`
