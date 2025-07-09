@@ -1,0 +1,597 @@
+/* ==============================================
+   1. Definição das Variáveis de Tema (Cores)
+   ============================================== */
+:root {
+  --bg-color: #f5f7fa;
+  --text-color: #333;
+  --text-color-light: #7f8c8d;
+  --card-bg: white;
+  --header-color: #2c3e50;
+  --border-color: #e0e6ed;
+  --border-color-light: #f1f2f6;
+  --button-bg: #f8f9fa;
+  --primary-color: #3498db;
+  --primary-color-hover: #2980b9;
+  --danger-color: #e74c3c;
+  --danger-color-hover: #c0392b;
+  --shadow-color: rgba(0,0,0,0.05);
+  --switch-bg: #ccc;
+  --switch-thumb-bg: white;
+}
+
+body.dark-mode {
+  --bg-color: #1a202c;
+  --text-color: #e2e8f0;
+  --text-color-light: #a0aec0;
+  --card-bg: #2d3748;
+  --header-color: #e2e8f0;
+  --border-color: #4a5568;
+  --border-color-light: #4a5568;
+  --button-bg: #4a5568;
+  --primary-color: #4299e1;
+  --primary-color-hover: #3182ce;
+  --danger-color: #f56565;
+  --danger-color-hover: #e53e3e;
+  --shadow-color: rgba(0,0,0,0.2);
+  --switch-bg: #5a67d8;
+  --switch-thumb-bg: white;
+}
+
+/* ==============================================
+   2. Estilos Gerais com Variáveis
+   ============================================== */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+}
+
+body {
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  line-height: 1.6;
+  padding: 20px;
+}
+
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  position: relative;
+}
+
+header {
+  text-align: center;
+  margin-bottom: 30px;
+  padding: 20px 0;
+  border-bottom: 1px solid var(--border-color);
+}
+
+header h1 {
+  color: var(--header-color);
+  font-weight: 600;
+}
+
+/* ==============================================
+   3. Estilos dos Componentes
+   ============================================== */
+
+.new-note {
+  border-radius: 10px;
+  padding: 25px;
+  margin-bottom: 40px;
+  background: var(--card-bg);
+  box-shadow: none;
+}
+
+.note-card {
+  background: var(--card-bg);
+  border-radius: 10px;
+  padding: 25px;
+  padding-bottom: 15px;
+  box-shadow: 0 4px 12px var(--shadow-color);
+  margin-bottom: 10px;
+  position: relative;
+}
+
+.note-header h2 {
+  font-size: 1.4rem;
+  color: var(--primary-color);
+  margin: 0;
+}
+
+textarea {
+  width: 100%;
+  min-height: 150px;
+  padding: 15px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  font-size: 16px;
+  resize: vertical;
+  margin-bottom: 15px;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+}
+
+textarea:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary-color) 15%, transparent);
+}
+
+.new-note-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.left-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.attach-btn {
+  background: var(--button-bg);
+  border: 1px solid var(--border-color);
+  color: var(--text-color-light);
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 20px;
+}
+
+.attach-btn:hover {
+  background: var(--primary-color);
+  color: white;
+  border-color: var(--primary-color);
+}
+
+.save-btn {
+  background: var(--primary-color);
+  color: white;
+  border: none;
+  padding: 12px 25px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.save-btn:hover {
+  background: var(--primary-color-hover);
+}
+
+/* Lista de notas */
+.notes-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.empty-notes {
+  padding: 80px 20px;
+  text-align: center;
+  color: var(--text-color-light);
+  font-size: 1.2rem;
+  font-style: italic;
+  opacity: 60%;
+}
+
+
+.note-card.is-editing {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary-color) 40%, transparent);
+}
+
+.note-content {
+  margin-bottom: 10px;
+  white-space: normal;
+  line-height: 1.5;
+  font-size: 16px;
+  word-wrap: break-word;
+  padding-right: 40px; /* Adiciona espaço à direita */
+}
+
+.note-content:empty {
+  display: none;
+  margin-bottom: 0; /* Também remove a margem inferior para um ajuste perfeito */
+}
+
+.note-content:empty + .attachments-section {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: none;
+}
+
+/* Estilos para links dentro do conteúdo da nota */
+.note-content a {
+  color: var(--primary-color); /* Cor padrão dos links */
+  text-decoration: none;
+}
+
+.note-content a:hover {
+  text-decoration: underline;
+}
+
+.note-content a:visited {
+  color: var(--primary-color); /* Mantém a mesma cor mesmo após visitado */
+}
+
+body.dark-mode .note-content a {
+  color: #64b5f6; /* Cor dos links no modo escuro (um azul mais claro) */
+}
+
+body.dark-mode .note-content a:visited {
+  color: #64b5f6; /* Mantém a mesma cor no modo escuro */
+}
+
+.note-content p {
+  margin: 0 0 0.2em 0;
+}
+
+.note-content ul, .note-content ol {
+  padding-left: 2em;
+  margin: 0 0 0.2em 0;
+}
+
+.note-actions {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  display: flex;
+  flex-direction: column; /* Empilha os botões verticalmente */
+  gap: 10px;
+}
+
+.note-actions-menu {
+  display: none; /* Começa escondido */
+  position: absolute;
+  top: 100%; /* Aparece abaixo do botão */
+  right: 0;
+  background-color: var(--card-bg);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px var(--shadow-color);
+  border: 1px solid var(--border-color);
+  z-index: 10;
+  min-width: 150px;
+  overflow: hidden;
+}
+
+.note-actions-menu.show {
+  display: block;
+}
+
+.note-menu-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 15px;
+  font-size: 14px;
+  cursor: pointer;
+  color: var(--text-color);
+  transition: background-color 0.2s;
+}
+
+.note-menu-option:hover {
+  background-color: var(--button-bg);
+}
+
+.note-menu-option-delete:hover {
+  background-color: color-mix(in srgb, var(--danger-color) 15%, transparent);
+  color: var(--danger-color);
+}
+
+.note-action-btn {
+  background: var(--note-bg);
+  border: 1px solid var(--border-color);
+  color: var(--text-color-light);
+  border-radius: 50%;
+  width: 37px;
+  height: 37px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 15px;
+}
+
+.note-action-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 2px 5px var(--shadow-color);
+}
+
+.edit-btn:hover {
+  background: var(--primary-color);
+  color: white;
+  border-color: var(--primary-color);
+}
+
+.delete-btn:hover {
+  background: var(--danger-color);
+  color: white;
+  border-color: var(--danger-color);
+}
+
+.note-meta {
+  font-size: 13px;
+  color: var(--text-color-light);
+  border-top: 1px solid var(--border-color-light);
+  padding-top: 7px;
+  margin-top: 15px;
+  display: flex;
+  justify-content: flex-start;
+}
+
+/* ==============================================
+   4. Estilos de Anexos
+   ============================================== */
+.attachments-preview {
+  margin-top: 20px;
+  margin-bottom: 10px;
+}
+
+.attachments-section {
+  margin-top: 20px;
+  padding-top: 15px;
+  border-top: 1px dashed var(--border-color);
+}
+
+.attachments-title {
+  font-size: 14px;
+  color: var(--text-color-light);
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.attachments-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.attachment-item {
+  background: var(--button-bg);
+  border-radius: 6px;
+  padding: 10px 15px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  width: calc(50% - 6px);
+}
+
+.attachment-icon {
+  color: var(--primary-color);
+}
+
+.attachment-name {
+  flex-grow: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.attachment-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto; /* Empurra os botões para a direita do item */
+}
+
+.download-attachment, .delete-attachment {
+  cursor: pointer;
+  padding: 5px;
+  border-radius: 4px;
+  transition: background 0.3s, color 0.3s;
+}
+
+.notes-list .note-card .delete-attachment {
+  display: none;
+}
+
+.notes-list .note-card.is-editing .delete-attachment {
+  display: block;
+}
+
+
+.download-attachment:hover {
+  background: color-mix(in srgb, var(--primary-color) 10%, transparent);
+  color: var(--primary-color);
+}
+
+.delete-attachment:hover {
+  background: color-mix(in srgb, var(--danger-color) 10%, transparent);
+  color: var(--danger-color);
+}
+
+/* ==============================================
+   5. Estilos do Toggle Switch
+   ============================================== */
+.theme-switch-container {
+    position: fixed;
+    top: 25px;
+    right: 25px;
+    z-index: 100;
+}
+
+.theme-switch {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 34px;
+}
+
+.theme-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--switch-bg);
+    transition: .4s;
+}
+
+.slider.round {
+    border-radius: 34px;
+}
+
+.slider.round:before {
+    position: absolute;
+    content: "";
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 4px;
+    background-color: var(--switch-thumb-bg);
+    transition: .4s;
+    border-radius: 50%;
+}
+
+input:checked + .slider.round:before {
+    transform: translateX(26px);
+}
+
+.slider .fa-sun, .slider .fa-moon {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--switch-thumb-bg);
+    font-size: 16px;
+}
+
+.slider .fa-sun {
+    left: 8px;
+    opacity: 1;
+}
+
+.slider .fa-moon {
+    right: 8px;
+    opacity: 0;
+}
+
+input:checked + .slider .fa-sun {
+    opacity: 0;
+}
+
+input:checked + .slider .fa-moon {
+    opacity: 1;
+}
+
+
+/* ==============================================
+   6. Outros Estilos (Incluindo Sintaxe)
+   ============================================== */
+.edit-textarea {
+  width: 95%;
+  min-height: 120px;
+  padding: 10px;
+  border: 1px solid var(--border-color);
+  border-radius: 5px;
+  margin-bottom: 10px;
+  font-size: 16px;
+  resize: vertical;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+}
+
+/* Estilos para links dentro da área de edição */
+.edit-textarea a {
+  color: var(--primary-color);
+  text-decoration: none;
+}
+
+.edit-textarea a:hover {
+  text-decoration: underline;
+}
+
+.edit-textarea a:visited {
+  color: var(--primary-color);
+}
+
+body.dark-mode .edit-textarea a {
+  color: #64b5f6;
+}
+
+body.dark-mode .edit-textarea a:visited {
+  color: #64b5f6;
+}
+
+.note-actions .save-edit-btn { background: #2ecc71; color: white; border-color: #2ecc71; }
+.note-actions .save-edit-btn:hover { background: #27ae60; border-color: #27ae60; }
+.note-actions .cancel-edit-btn { background: #f39c12; color: white; border-color: #f39c12; }
+.note-actions .cancel-edit-btn:hover { background: #e67e22; border-color: #e67e22; }
+
+.syntax-btn { font-size: 18px; }
+.syntax-helper-container { position: relative; display: inline-block; }
+.syntax-dropdown { display: none; position: absolute; top: calc(100% + 5px); left: 0; background-color: var(--card-bg); min-width: 200px; box-shadow: 0px 8px 16px 0px var(--shadow-color); z-index: 10; border-radius: 8px; border: 1px solid var(--border-color); max-height: 250px; overflow-y: auto; overflow-x: hidden; }
+.syntax-dropdown.show, .syntax-submenu.show { display: block; }
+.syntax-option { color: var(--text-color); padding: 10px 15px; text-decoration: none; display: flex; justify-content: space-between; align-items: center; cursor: pointer; font-size: 14px; white-space: nowrap; }
+.syntax-option:hover { background-color: var(--bg-color); }
+.syntax-submenu { display: none; position: absolute; top: -1px; left: 100%; background-color: var(--card-bg); min-width: 160px; box-shadow: 0px 8px 16px 0px var(--shadow-color); z-index: 11; border-radius: 8px; border: 1px solid var(--border-color); }
+
+pre { background-color: #2d2d2d; color: #f8f8f2; border-radius: 6px; padding: 1em; white-space: pre-wrap; word-wrap: break-word; font-family: 'Fira Code', 'Courier New', Courier, monospace; margin: 1em 0; }
+body.dark-mode pre { background-color: #1e2430; }
+code { font-family: 'Fira Code', 'Courier New', Courier, monospace; }
+.task-list-item { display: flex; align-items: center; gap: 0.5em; margin: 0.2em 0; }
+.task-list-item label { flex: 1; }
+.task-list-item input:checked + label { text-decoration: line-through; color: var(--text-color-light); }
+.task-list-item input:checked + label a { color: var(--text-color-light); }
+body.dark-mode .task-list-item input:checked + label a { color: var(--text-color-light); }
+.task-list-item input\[type="checkbox"\] { width: 1.1em; height: 1.1em; margin: 0; }
+.note-content p, .note-content ul, .note-content ol { margin: 0.5em 0; }
+.note-content ul, .note-content ol { padding-left: 2em; }
+.update-notification { position: fixed; bottom: 20px; right: 20px; background-color: #27ae60; color: white; padding: 12px 20px; border-radius: 8px; box-shadow: 0 4px 12px var(--shadow-color); z-index: 1000; display: flex; align-items: center; gap: 10px; animation: fadeInOut 2s ease-in-out; }
+
+/* ==============================================
+   7. Estilos Personalizados da Barra de Rolagem
+   ============================================== */
+
+/* Para Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--text-color-light) var(--bg-color);
+}
+
+/* Para Chrome, Safari, Edge, e outros baseados em WebKit */
+
+/* Define a largura da barra de rolagem inteira */
+::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+/* O fundo da barra (a "pista" onde o polegar corre) */
+::-webkit-scrollbar-track {
+  background: var(--bg-color);
+}
+
+/* O "polegar" arrastável da barra de rolagem */
+::-webkit-scrollbar-thumb {
+  background-color: var(--text-color-light);
+  border-radius: 20px;
+  border: 3px solid var(--bg-color); /* Cria um efeito de espaçamento */
+}
+
+/* O "polegar" ao passar o mouse por cima */
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--primary-color);
+}
+
+@keyframes fadeInOut { 0% { opacity: 0; transform: translateY(20px); } 10% { opacity: 1; transform: translateY(0); } 90% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(20px); } }
