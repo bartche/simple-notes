@@ -1,24 +1,27 @@
 # Simple Notes
 
-A simple, self-hosted, and encrypted note-taking web app. Built with Node.js, it provides a clean and modern interface to keep your thoughts and files secure.
+A simple, secure, and real-time note-taking web application. Built with Node.js, Simple Notes allows you to store your thoughts and files with encryption, all through a clean and modern web interface.
 
 -----
 
 ## About The Project
 
-Simple Notes is a web-based application built with Node.js and Express that allows you to securely save your notes and files. With a focus on simplicity and privacy, all your data is encrypted, giving you full control and peace of mind. The interface is designed to be minimal and intuitive, allowing you to focus on what matters most: your notes.
+Simple Notes was created to be a straightforward, self-hosted solution for taking notes securely. The main goal is to provide a minimalist user experience without sacrificing essential features like security and real-time collaboration. Your notes and files are encrypted, ensuring that you are the only one who can access your data.
 
-Whether you need to jot down a quick thought, write a detailed note with formatted text, or securely store a sensitive file, Simple Notes is the perfect tool for the job.
+* All updates happen in real-time thanks to WebSockets, meaning if you have the app open on two different devices, your changes will be reflected on both instantly.
+
+* Whether you need to jot down a quick thought, write a detailed note with formatted text, or securely store a sensitive file, Simple Notes is the perfect tool for the job.
 
 -----
 
 ## ✨ Features
 
-  * 🔐 **Encrypted Storage**: All your notes and attachments are encrypted before being saved, ensuring your data remains private.
+  * 🔐 **Secure Storage**: All your notes and attachments are encrypted before being saved, ensuring your data remains private.
+  * 🔃 **Real-time Updates**: Using WebSockets, your notes are updated across all sessions instantly. No need to refresh the page.
   * 💻 **Clean and Modern UI**: A beautiful and simple interface that gets out of your way.
   * 🎨 **Light & Dark Themes**: Switch between light and dark mode for your viewing comfort.
   * 📎 **File Attachments**: Securely attach any file to your notes.
-  * ✍️ **Markdown Syntax Helper**: A quick guide for formatting your text with headers, bold, italics, strikethrough, and code blocks.
+  * ✍️ **Markdown Syntax Helper**: A quick guide for formatting your text with headers, bold, italics, strikethrough, checkboxes, lists, urls and code blocks.
   * 📝 **Full Note Management**: Easily create, edit, and delete your notes.
   * 🚀 **Self-Hosted**: You have full control over your data on your own server.
 
@@ -85,6 +88,25 @@ Once the application is running (either via Docker or from source), open your we
 
 **http://localhost:3000**
 
-## DISCLAIMER
+-----
 
-Majorly written by AI.
+## 🔒 Running Behind a Reverse Proxy
+
+If you plan to run Simple Notes behind a reverse proxy (like Nginx, Apache, etc.), it's crucial to configure it to allow WebSocket connections to pass through. This is essential for the real-time update feature.
+
+As an exemple, for Nginx you must add the following directives to your server block configuration:
+
+    # Required for WebSocket support
+    proxy_http_version 1.1;
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection "upgrade";
+    
+    # Optional but recommended headers
+    proxy_set_header Host $host;
+    proxy_cache_bypass $http_upgrade;
+
+-----
+    
+## 🤖 DISCLAIMER
+
+Please note: A significant portion of the code for this project was written by AI. It was guided, tested, and modified by a human developer, but AI played a central role in its creation.
