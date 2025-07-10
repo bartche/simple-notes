@@ -1,6 +1,11 @@
-# Simple Notes
+<div align="center">
+  <img src="./public/imgs/icon.png" alt="Simple Notes Logo" width="150">
+  <h1>Simple Notes</h1>
+</div>
 
+<div align="center">
 A simple, secure, and real-time note-taking web application. Built with Node.js, Simple Notes allows you to store your thoughts and files with encryption, all through a clean and modern web interface.
+</div>
 
 -----
 
