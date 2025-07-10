@@ -1,7 +1,8 @@
 # Simple Notes
-A simple note-taking app with encryption build in Node
+A simple but yet encrypted note-taking app with live updates built in NodeJS.
 
-Run by
+Get started by cloning the repo and running:
+
 `npm install` and `node server.js`
 
 or simply
