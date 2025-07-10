@@ -132,6 +132,21 @@ function handleListContinuation(event) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+
+  // --- LÓGICA DE SERVICE WORKER (Correta) ---
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/service-worker.js')
+        .then((registration) => {
+          console.log('Service Worker registrado com sucesso:', registration);
+        })
+        .catch((error) => {
+          console.log('Falha ao registrar o Service Worker:', error);
+        });
+    });
+  }
+
+  // --- LÓGICA DE TEMA (Correta) ---
   const themeToggle = document.getElementById('theme-checkbox');
   const applyTheme = (theme) => {
     if (theme === 'dark') {
@@ -147,109 +162,111 @@ document.addEventListener('DOMContentLoaded', () => {
     localStorage.setItem('theme', newTheme);
     applyTheme(newTheme);
   });
-  const savedTheme = localStorage.getItem('theme') || 'light';
+  const savedTheme = localStorage.getItem('theme') || 'dark';
   applyTheme(savedTheme);
   
+  // --- INICIALIZAÇÃO E LISTENERS PRINCIPAIS (Corretos) ---
   loadNotes();
   setupLiveUpdate();
   document.getElementById('saveNoteBtn').addEventListener('click', saveNewNote);
   document.getElementById('fileUpload').addEventListener('change', handleNewAttachment);
   document.getElementById('newNoteContent').addEventListener('keydown', handleListContinuation);
   
+  // ==========================================================
+  // --- LÓGICA DE MENUS REFEITA E CORRIGIDA ---
+  // ==========================================================
+  
+  // Seletores dos menus
   const syntaxHelperContainer = document.querySelector('.syntax-helper-container');
   const syntaxBtn = document.getElementById('syntaxHelperBtn');
   const mainDropdown = document.getElementById('syntaxDropdown');
-  const submenus = document.querySelectorAll('.syntax-submenu');
-  const hideAllSubmenus = () => submenus.forEach(submenu => submenu.classList.remove('show'));
-  
+  const notesListContainer = document.getElementById('notesList');
+
+  // Funções para fechar os menus
+  const closeAllSubmenus = () => document.querySelectorAll('.syntax-submenu').forEach(m => m.classList.remove('show'));
+  const closeAllNoteActionMenus = () => document.querySelectorAll('.note-actions-menu.show').forEach(m => m.classList.remove('show'));
+
+  // Listener para o menu de sintaxe
   syntaxBtn.addEventListener('click', (event) => {
     event.stopPropagation();
+    closeAllNoteActionMenus(); // Fecha o outro tipo de menu
     mainDropdown.classList.toggle('show');
-    if (!mainDropdown.classList.contains('show')) hideAllSubmenus();
-  });
-  
-  mainDropdown.addEventListener('mouseover', (event) => {
-      const option = event.target.closest('[data-target-submenu]');
-      if (option) {
-          const submenuId = option.dataset.targetSubmenu;
-          const submenu = document.getElementById(submenuId);
-          if (submenu && !submenu.classList.contains('show')) {
-              hideAllSubmenus();
-              submenu.style.left = `${mainDropdown.offsetWidth - 1}px`;
-              submenu.style.top = `${option.offsetTop - mainDropdown.scrollTop}px`;
-              submenu.classList.add('show');
-          }
-      } else if (event.target.closest('.syntax-option') && !event.target.closest('[data-target-submenu]')) {
-         hideAllSubmenus();
-      }
+    if (!mainDropdown.classList.contains('show')) {
+      closeAllSubmenus();
+    }
   });
 
+  // Lida com o mouseover para mostrar submenus de sintaxe
+  mainDropdown.addEventListener('mouseover', (event) => {
+    const option = event.target.closest('[data-target-submenu]');
+    if (option) {
+      const submenuId = option.dataset.targetSubmenu;
+      const submenu = document.getElementById(submenuId);
+      if (submenu && !submenu.classList.contains('show')) {
+        closeAllSubmenus();
+        submenu.style.left = `${mainDropdown.offsetWidth - 1}px`;
+        submenu.style.top = `${option.offsetTop - mainDropdown.scrollTop}px`;
+        submenu.classList.add('show');
+      }
+    } else if (event.target.closest('.syntax-option')) {
+      closeAllSubmenus();
+    }
+  });
+
+  // Listener para o clique em uma opção de sintaxe
   syntaxHelperContainer.addEventListener('click', (event) => {
     const option = event.target.closest('.syntax-option');
     if (option && !option.hasAttribute('data-target-submenu')) {
-        insertSyntax(option.dataset.prefix || '', option.dataset.suffix || '');
-        mainDropdown.classList.remove('show');
-        hideAllSubmenus();
-    }
-  });
-  
-  syntaxHelperContainer.addEventListener('mouseleave', () => hideAllSubmenus());
-
-  // --- NOVA LÓGICA DE EVENTOS PARA OS CARDS DE NOTA ---
-  const notesListContainer = document.getElementById('notesList');
-
-  // Função para fechar todos os menus de ação abertos
-  const closeAllNoteActionMenus = () => {
-      document.querySelectorAll('.note-actions-menu.show').forEach(menu => {
-          menu.classList.remove('show');
-      });
-  };
-
-  notesListContainer.addEventListener('click', (event) => {
-      const target = event.target;
-      
-      // Lógica para o botão de toggle do menu de ações (...)
-      const actionTrigger = target.closest('.note-actions-trigger');
-      if (actionTrigger) {
-          const menu = actionTrigger.nextElementSibling;
-          const isShowing = menu.classList.contains('show');
-          closeAllNoteActionMenus(); // Fecha outros menus antes de abrir um novo
-          if (!isShowing) {
-              menu.classList.add('show');
-          }
-          return;
-      }
-      
-      // Lógica para as opções do menu (Editar, Apagar)
-      const menuOption = target.closest('.note-menu-option');
-      if (menuOption) {
-          const noteId = menuOption.dataset.id;
-          const action = menuOption.dataset.action;
-
-          if (action === 'edit') {
-              openEditMode(noteId);
-          } else if (action === 'delete') {
-              deleteNote(noteId);
-          }
-          closeAllNoteActionMenus(); // Fecha o menu após a ação
-          return;
-      }
-
-      // Lógica para os checkboxes de tarefas
-      const taskCheckbox = target.closest('.task-list-item input[type="checkbox"]');
-      if(taskCheckbox) {
-          handleTaskCheck(event);
-      }
-  });
-
-  // Fecha menus de ação ao clicar fora deles
-  window.addEventListener('click', (event) => {
-    if (!event.target.closest('.syntax-helper-container')) {
+      insertSyntax(option.dataset.prefix || '', option.dataset.suffix || '');
       mainDropdown.classList.remove('show');
-      hideAllSubmenus();
+      closeAllSubmenus();
     }
-    if (!event.target.closest('.note-actions')) {
-        closeAllNoteActionMenus();
+  });
+
+  // Listener principal para as ações nos cards de nota (usando delegação)
+  notesListContainer.addEventListener('click', (event) => {
+    const target = event.target;
+    
+    // Clicou no gatilho do menu de ações (...) de uma nota
+    const actionTrigger = target.closest('.note-actions-trigger');
+    if (actionTrigger) {
+      event.stopPropagation();
+      const menu = actionTrigger.nextElementSibling;
+      const isShowing = menu.classList.contains('show');
+      closeAllNoteActionMenus(); // Fecha outros menus de nota
+      mainDropdown.classList.remove('show'); // Fecha o menu de sintaxe
+      closeAllSubmenus();
+      if (!isShowing) {
+        menu.classList.add('show');
+      }
+      return;
+    }
+    
+    // Clicou em uma opção do menu de ações (Editar/Apagar)
+    const menuOption = target.closest('.note-menu-option');
+    if (menuOption) {
+      const noteId = menuOption.dataset.id;
+      const action = menuOption.dataset.action;
+      if (action === 'edit') openEditMode(noteId);
+      if (action === 'delete') deleteNote(noteId);
+      closeAllNoteActionMenus();
+      return;
+    }
+
+    // Clicou em um checkbox de tarefa
+    const taskCheckbox = target.closest('.task-list-item input[type="checkbox"]');
+    if (taskCheckbox) {
+      handleTaskCheck(event);
+    }
+  });
+
+  // Listener global para fechar menus ao clicar fora
+  window.addEventListener('click', (event) => {
+    // Se o clique não foi em nenhum dos containers de menu, fecha tudo
+    if (!event.target.closest('.syntax-helper-container') && !event.target.closest('.note-actions')) {
+      mainDropdown.classList.remove('show');
+      closeAllSubmenus();
+      closeAllNoteActionMenus();
     }
   });
 });

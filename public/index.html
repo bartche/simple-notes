@@ -4,26 +4,31 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Simple Notes</title>
+
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#3498db"/>
+
   <link rel="icon" type="image/x-icon" href="imgs/favicon.ico">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="theme-switch-container">
-    <label class="theme-switch" for="theme-checkbox">
-      <input type="checkbox" id="theme-checkbox" />
-      <div class="slider round">
-        <i class="fas fa-sun"></i>
-        <i class="fas fa-moon"></i>
-      </div>
-    </label>
-  </div>
-
   <div class="container">
-    <header>
-      <img src="imgs/icon.png" alt="Simple Notes Logo" class="logo">
-      <h1>Simple Notes</h1>
-    </header>
+  <header>
+      <div class="header-content">
+          <img src="imgs/icon.png" alt="Simple Notes Logo" class="logo">
+          <h1>Simple Notes</h1>
+      </div>
+      <div class="theme-switch-container">
+          <label class="theme-switch" for="theme-checkbox">
+              <input type="checkbox" id="theme-checkbox">
+              <div class="slider round">
+                  <i class="fas fa-sun"></i>
+                  <i class="fas fa-moon"></i>
+              </div>
+          </label>
+      </div>
+  </header>
 
     <div class="new-note">
       <textarea id="newNoteContent" placeholder="Start writing here..."></textarea>
@@ -72,5 +77,12 @@
   </div>
 
   <script defer src="script.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/service-worker.js')
+        .then(reg => console.log("Service Worker registrado:", reg))
+        .catch(err => console.error("Erro ao registrar Service Worker:", err));
+    }
+  </script>
 </body>
 </html>

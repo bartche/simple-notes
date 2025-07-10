@@ -67,8 +67,13 @@ header {
   align-items: center;
   margin-bottom: 30px;
   padding: 20px 0;
-  justify-content: center;
+  justify-content: space-between;
   border-bottom: 1px solid var(--border-color);
+}
+
+.header-content {
+    display: flex; /* Alinha a logo e o título horizontalmente */
+    align-items: center; /* Alinha verticalmente a logo e o título */
 }
 
 header h1 {
@@ -82,6 +87,61 @@ header h1 {
     height: 40px; /* Define a altura da imagem (ajuste conforme necessário) */
     width: auto; /* Mantém a proporção da imagem */
     margin-right: 15px; /* Adiciona um espaço entre a imagem e o título se a imagem vier antes */
+}
+
+@media (max-width: 768px) {
+    header {
+        align-items: flex-start; /* Alinha os itens à esquerda */
+        padding: 15px; /* Reduz um pouco o padding em telas menores */
+    }
+
+    .header-content {
+        margin-bottom: 10px; /* Adiciona um espaço entre a logo/título e o toggle */
+        width: 100%; /* Garante que o conteúdo ocupe a largura total */
+    }
+
+    header h1 {
+        font-size: 1.7rem; /* Reduz um pouco a fonte do título em telas menores */
+        margin-left: 10px;
+    }
+    
+    .theme-switch {
+        width: 51px;
+        height: 28px;
+    }
+    
+    .slider.round:before {
+        height: 22px;
+        width: 22px;
+        left: 3px;
+        bottom: 3px;
+    }
+    
+    input:checked + .slider.round:before {
+        transform: translateX(23px);
+    }
+    
+    .slider .fa-sun, .slider .fa-moon {
+        font-size: 14px;
+    }
+    
+    .slider .fa-sun {
+        left: 6px;
+    }
+    
+    .slider .fa-moon {
+        right: 6px;
+    }
+}
+
+/* Estilos ainda menores (opcional, ajuste conforme necessário) */
+@media (max-width: 500px) {
+    header h1 {
+        font-size: 1.3rem;
+    }
+    .logo {
+        height: 30px;
+    }
 }
 
 /* ==============================================
@@ -430,10 +490,10 @@ body.dark-mode .note-content a:visited {
    5. Estilos do Toggle Switch
    ============================================== */
 .theme-switch-container {
-    position: fixed;
-    top: 25px;
-    right: 25px;
-    z-index: 100;
+/*    position: fixed; */
+/*    top: 25px; */
+/*    right: 25px; */
+    z-index: 2;
 }
 
 .theme-switch {
@@ -490,20 +550,20 @@ input:checked + .slider.round:before {
 
 .slider .fa-sun {
     left: 8px;
-    opacity: 1;
+    opacity: 0;
 }
 
 .slider .fa-moon {
     right: 8px;
-    opacity: 0;
+    opacity: 1;
 }
 
 input:checked + .slider .fa-sun {
-    opacity: 0;
+    opacity: 1;
 }
 
 input:checked + .slider .fa-moon {
-    opacity: 1;
+    opacity: 0;
 }
 
 
