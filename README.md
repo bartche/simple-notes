@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="./public/imgs/icon.png" alt="Simple Notes Logo" width="150">
+  <img src="./public/imgs/circle_icon.png" alt="Simple Notes Logo" width="150">
   <h1>Simple Notes</h1>
 </div>
 
