@@ -84,6 +84,11 @@ document.addEventListener('DOMContentLoaded', () => {
         e.preventDefault();
         const username = document.getElementById('register-username').value;
         const password = document.getElementById('register-password').value;
+		
+		if (username.length < 4 || password.length < 4) {
+			showToast('Username and password must be at least 4 characters long.', 'error');
+			return;
+		}
 
         try {
             const response = await fetch('/api/users/register', {
