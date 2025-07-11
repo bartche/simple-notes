@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile - Simple Notes</title>
+	<meta name="theme-color" content="#3498db"/>
+	<link rel="icon" type="image/x-icon" href="imgs/circle_favicon.ico">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+	<div id="toast-container"></div>
+    <div class="container">
+        <header>
+            <a href="/" class="back-link"><i class="fas fa-arrow-left"></i>  Back to Notes</a>
+        </header>
+
+        <div class="profile-container">
+            <h1>User Profile</h1>
+            
+            <div class="profile-section">
+                <h2>Username</h2>
+                <p id="username-display">Loading...</p>
+            </div>
+
+            <div class="profile-section">
+                <h2>Change Password</h2>
+                <form id="change-password-form">
+                    <input type="password" id="current-password" placeholder="Current Password" required>
+                    <input type="password" id="new-password" placeholder="New Password" required>
+                    <button type="submit">Save New Password</button>
+                    <p id="password-feedback" class="feedback-message"></p>
+                </form>
+            </div>
+
+            <div class="profile-section">
+                <h2>General Settings</h2>
+                <div class="theme-switch-wrapper">
+                    <span style="margin-right: 10px;">Change app theme</span>
+                    <div class="theme-switch-container">
+                        <label class="theme-switch" for="theme-checkbox">
+                            <input type="checkbox" id="theme-checkbox" />
+                            <div class="slider round">
+                                <i class="fas fa-sun"></i>
+                                <i class="fas fa-moon"></i>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+            </div>
+			
+			<div id="admin-registration-panel" class="profile-section admin-panel" style="display: none;">
+				<h2>Administrator Settings</h2>
+				<div class="setting-toggle-wrapper">
+					<span style="margin-right: 10px;">Allow new user registration</span>
+					<label class="theme-switch">
+						<input type="checkbox" id="allow-registrations-toggle" />
+						<div class="slider round"></div>
+					</label>
+				</div>
+			</div>
+
+			<div id="admin-users-panel" class="profile-section admin-panel" style="display: none;">
+				<h2>User Management</h2>
+				<table id="users-table">
+					<thead>
+						<tr>
+							<th>ID</th>
+							<th>User</th>
+							<th>Admin (Root)</th>
+							<th>Action</th>
+						</tr>
+					</thead>
+					<tbody>
+						</tbody>
+				</table>
+			</div>
+
+            <div class="profile-section">
+                <button id="logout-btn" class="logout-btn-profile">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </div>
+        </div>
+    </div>
+    <script src="profile.js"></script>
+</body>
+</html>

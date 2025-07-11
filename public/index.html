@@ -8,26 +8,24 @@
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#3498db"/>
 
-  <link rel="icon" type="image/x-icon" href="imgs/favicon.ico">
+  <link rel="icon" type="image/x-icon" href="imgs/circle_favicon.ico">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
+  <div id="toast-container"></div>
   <div class="container">
   <header>
       <div class="header-content">
-          <img src="imgs/icon.png" alt="Simple Notes Logo" class="logo">
+          <img src="imgs/circle_icon.png" alt="Simple Notes Logo" class="logo">
           <h1>Simple Notes</h1>
       </div>
-      <div class="theme-switch-container">
-          <label class="theme-switch" for="theme-checkbox">
-              <input type="checkbox" id="theme-checkbox">
-              <div class="slider round">
-                  <i class="fas fa-sun"></i>
-                  <i class="fas fa-moon"></i>
-              </div>
-          </label>
-      </div>
+	  <div class="header-actions">
+		<span id="username-display" class="username-display"></span>
+		<a href="/profile.html" class="profile-btn" title="Ver Perfil">
+			<i class="fas fa-user-circle"></i>
+		</a>
+	  </div>
   </header>
 
     <div class="new-note">
@@ -48,12 +46,12 @@
             </button>
             <div id="syntaxDropdown" class="syntax-dropdown">
               <div class="syntax-option" data-target-submenu="title-submenu">
-                <span>Title</span>
+                <span>Headings</span>
                 <i class="fas fa-chevron-right" style="font-size: 0.8em; color: #7f8c8d;"></i>
               </div>
               <div class="syntax-option" data-prefix="- [ ] ">Task Checkbox</div>
-              <div class="syntax-option" data-prefix="- ">Unordened list</div>
-              <div class="syntax-option" data-prefix="1- ">Ordened list</div>
+              <div class="syntax-option" data-prefix="- ">Unordened List</div>
+              <div class="syntax-option" data-prefix="1- ">Ordened List</div>
               <div class="syntax-option" data-prefix="*" data-suffix="*">Bold</div>
               <div class="syntax-option" data-prefix="_" data-suffix="_">Italic</div>
               <div class="syntax-option" data-prefix="~" data-suffix="~">Strikethrough</div>
@@ -62,9 +60,9 @@
             </div>
 
             <div id="title-submenu" class="syntax-submenu">
-              <div class="syntax-option" data-prefix="# ">Title 1</div>
-              <div class="syntax-option" data-prefix="## ">Title 2</div>
-              <div class="syntax-option" data-prefix="### ">Title 3</div>
+              <div class="syntax-option" data-prefix="# ">Heading 1</div>
+              <div class="syntax-option" data-prefix="## ">Heading 2</div>
+              <div class="syntax-option" data-prefix="### ">Heading 3</div>
             </div>
           </div>
         </div> <button id="saveNoteBtn" class="save-btn">

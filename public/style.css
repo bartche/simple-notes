@@ -16,6 +16,7 @@
   --danger-color-hover: #c0392b;
   --shadow-color: rgba(0,0,0,0.05);
   --switch-bg: #ccc;
+  --switch-bg-on: #5a67d8;
   --switch-thumb-bg: white;
 }
 
@@ -33,7 +34,8 @@ body.dark-mode {
   --danger-color: #f56565;
   --danger-color-hover: #e53e3e;
   --shadow-color: rgba(0,0,0,0.2);
-  --switch-bg: #5a67d8;
+  --switch-bg: #ccc;
+  --switch-bg-on: #5a67d8;
   --switch-thumb-bg: white;
 }
 
@@ -78,13 +80,13 @@ header {
 
 header h1 {
     color: var(--header-color);
-    font-weight: 600;
+    font-weight: 800;
     margin-left: 15px; /* Adiciona um espaço entre a imagem e o título (ajuste conforme necessário) */
     margin-bottom: 0; /* Remove a margem inferior padrão do h1 */
 }
 
 .logo {
-    height: 40px; /* Define a altura da imagem (ajuste conforme necessário) */
+    height: 60px; /* Define a altura da imagem (ajuste conforme necessário) */
     width: auto; /* Mantém a proporção da imagem */
     margin-right: 15px; /* Adiciona um espaço entre a imagem e o título se a imagem vier antes */
 }
@@ -520,6 +522,10 @@ body.dark-mode .note-content a:visited {
     transition: .4s;
 }
 
+input:checked + .slider {
+	background-color: var(--switch-bg-on); 
+}
+
 .slider.round {
     border-radius: 34px;
 }
@@ -631,6 +637,23 @@ body.dark-mode .task-list-item input:checked + label a { color: var(--text-color
 .note-content ul, .note-content ol { padding-left: 2em; }
 .update-notification { position: fixed; bottom: 20px; right: 20px; background-color: #27ae60; color: white; padding: 12px 20px; border-radius: 8px; box-shadow: 0 4px 12px var(--shadow-color); z-index: 1000; display: flex; align-items: center; gap: 10px; animation: fadeInOut 2s ease-in-out; }
 
+/* Adicione no final do arquivo */
+/* Estilos da Página de Login */
+.login-page { display: flex; align-items: center; justify-content: center; min-height: 100vh; }
+.auth-container { background: var(--card-bg); padding: 40px; border-radius: 10px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 100%; max-width: 400px; text-align: center; }
+body.dark-mode .auth-container { box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
+.auth-form-container h1 { margin-bottom: 20px; color: var(--header-color); }
+.auth-form-container input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid var(--border-color); border-radius: 5px; background: var(--bg-color); color: var(--text-color); }
+.auth-form-container button { width: 100%; padding: 12px; border: none; border-radius: 5px; background: var(--primary-color); color: white; font-size: 16px; cursor: pointer; }
+.auth-form-container p { margin-top: 20px; }
+.auth-error { color: var(--danger-color); margin-top: 15px; min-height: 1em; }
+
+/* Estilos do Cabeçalho do App */
+.header-actions { display: flex; align-items: center; gap: 15px; }
+.username-display { font-weight: 500; }
+.logout-btn { background: none; border: none; color: var(--text-color-light); font-size: 20px; cursor: pointer; padding: 5px; }
+.logout-btn:hover { color: var(--danger-color); }
+
 /* ==============================================
    7. Estilos Personalizados da Barra de Rolagem
    ============================================== */
@@ -666,4 +689,308 @@ body.dark-mode .task-list-item input:checked + label a { color: var(--text-color
   background-color: var(--primary-color);
 }
 
+/* ==============================================
+   ESTILOS DA PÁGINA DE PERFIL E NOVOS BOTÕES
+   ============================================== */
+
+/* Botão de Perfil no Cabeçalho */
+.profile-btn {
+    font-size: 28px;
+    color: var(--text-color-light);
+    transition: color 0.2s;
+}
+.profile-btn:hover {
+    color: var(--primary-color);
+}
+
+/* Container da Página de Perfil */
+.profile-container {
+    background: var(--card-bg);
+    border-radius: 10px;
+    padding: 30px 40px;
+}
+.profile-section {
+    padding: 25px 0;
+    border-bottom: 1px solid var(--border-color);
+}
+.profile-section:last-child {
+    border-bottom: none;
+}
+.profile-container h1 { margin-bottom: 20px; }
+.profile-container h2 { margin-bottom: 15px; color: var(--header-color); }
+#username-display { font-size: 1.1rem; }
+
+/* Formulário de Senha */
+#change-password-form input {
+    width: 100%;
+    max-width: 400px;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    border: 1px solid var(--border-color);
+    background-color: var(--bg-color);
+    color: var(--text-color);
+}
+#change-password-form button {
+    padding: 10px 20px;
+    /* Usa o mesmo estilo do .save-btn */
+}
+.feedback-message {
+    margin-top: 10px;
+    font-weight: 500;
+}
+.feedback-message.success { color: #27ae60; }
+.feedback-message.error { color: var(--danger-color); }
+
+/* Wrapper do Toggle de Tema */
+.theme-switch-wrapper {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: none;
+}
+
+/* Botão de Logout na Página de Perfil */
+.logout-btn-profile {
+    width: 100%;
+    max-width: 400px;
+    padding: 12px;
+    border: 1px solid var(--danger-color);
+    color: var(--danger-color);
+    background-color: transparent;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.2s, color 0.2s;
+}
+.logout-btn-profile:hover {
+    background-color: var(--danger-color);
+    color: white;
+}
+
+/* Link para Voltar */
+.back-link {
+    color: var(--text-color);
+    text-decoration: none;
+    font-weight: 500;
+}
+.back-link:hover {
+    color: var(--primary-color);
+}
+
+/* Estilo para os links da página de login */
+.auth-container a, 
+.auth-container a:visited {
+    color: var(--primary-color);
+    font-weight: bold;
+    text-decoration: none;
+}
+
+.auth-container a:hover {
+    text-decoration: underline;
+}
+
+/* Estilo para o botão de alterar senha na página de perfil */
+#change-password-form button {
+    display: block; /* Garante que o botão fique em sua própria linha */
+    width: 100%;
+    max-width: 400px;
+    margin-top: 10px; /* Adiciona espaço acima do botão */
+    
+    /* Estilos copiados do .save-btn para consistência */
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 500;
+    transition: background-color 0.2s;
+}
+
+#change-password-form button:hover {
+    background: var(--primary-color-hover);
+}
+
+/* Estilos do Painel de Admin */
+.setting-toggle-wrapper {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 400px;
+}
+
+.setting-toggle-wrapper, #users-table {
+    max-width: none; /* Remove a limitação de largura */
+    width: 100%;
+}
+
+#users-table {
+    margin-top: 15px;
+    border-collapse: collapse;
+}
+
+#users-table th, #users-table td {
+    text-align: left;
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--border-color);
+    vertical-align: middle; /* <-- ADICIONE ESTA LINHA */
+}
+
+#users-table th {
+    color: var(--text-color-light);
+}
+
+.admin-action-btn {
+    border: none;
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 500;
+    color: white;
+	margin-left: 10px;
+	margin-right: 10px;
+}
+
+.promote-btn {
+    background: none;
+    border: 1px solid var(--primary-color);
+    color: var(--primary-color);
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+.promote-btn:hover {
+    background: var(--primary-color);
+    color: white;
+}
+
+.demote-btn {
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    background-color: #f39c12; /* Laranja */
+}
+.demote-btn:hover {
+    background-color: #e67e22;
+}
+
+.delete-user-btn {
+    background-color: var(--danger-color);
+}
+.delete-user-btn:hover {
+    background-color: var(--danger-color-hover);
+}
+
+.status-root {
+    color: var(--primary-color);
+    font-weight: bold;
+}
+
+/* ==============================================
+   NOVOS ESTILOS PARA UPLOAD
+   ============================================== */
+
+/* Estilo para quando um arquivo está sendo arrastado sobre o textarea */
+textarea.is-dragging-over {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 10px color-mix(in srgb, var(--primary-color) 30%, transparent);
+}
+
+/* Container para o status do anexo (uploading, success, error) */
+.attachment-status {
+    font-size: 16px;
+    margin-left: auto; /* Empurra o ícone para a direita */
+    padding-left: 10px;
+}
+
+.attachment-status .fa-spinner {
+    color: var(--primary-color);
+}
+
+.attachment-status .success-icon {
+    color: #27ae60; /* Verde */
+}
+
+.attachment-status .error-icon {
+    color: var(--danger-color);
+}
+
+/* ==============================================
+   ESTILOS PARA NOTIFICAÇÕES (TOASTS)
+   ============================================== */
+
+.toast-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: flex-start;
+}
+
+.toast {
+	position: fixed;
+	z-index: 9999;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 15px 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    color: white;
+    font-weight: 500;
+    min-width: 250px;
+    max-width: 350px;
+    animation: slideInRight 0.4s ease-out forwards;
+}
+
+.toast.fade-out {
+    animation: fadeOutRight 0.4s ease-in forwards;
+}
+
+.toast i {
+    font-size: 20px;
+}
+
+/* Tipos de Toast */
+.toast.toast-success {
+    background-color: #27ae60; /* Verde */
+}
+
+.toast.toast-error {
+    background-color: var(--danger-color); /* Usa a variável de perigo que já temos */
+}
+
+.toast.toast-info {
+    background-color: var(--primary-color); /* Usa a variável primária para informações */
+}
+
 @keyframes fadeInOut { 0% { opacity: 0; transform: translateY(20px); } 10% { opacity: 1; transform: translateY(0); } 90% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(20px); } }
+
+/* Animações */
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(100%);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes fadeOutRight {
+    from {
+        opacity: 1;
+        transform: translateX(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateX(100%);
+    }
+}

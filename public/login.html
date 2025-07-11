@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Simple Notes</title>
+	<meta name="theme-color" content="#3498db"/>
+	<link rel="icon" type="image/x-icon" href="imgs/circle_favicon.ico">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="login-page dark-mode">
+	<div id="toast-container"></div>
+    <div class="auth-container">
+        <div class="auth-form-container" id="login-container">
+			<img src="imgs/circle_icon.png" alt="Simple Notes Logo" class="logo">
+            <h1>Login</h1>
+            <form id="login-form">
+                <input type="text" id="login-username" placeholder="User" required>
+                <input type="password" id="login-password" placeholder="Password" required>
+                <button type="submit">Login</button>
+            </form>
+            <p>Don't have an account? <a href="#" id="show-register">Register</a></p>
+        </div>
+
+        <div class="auth-form-container" id="register-container" style="display:none;">
+			<img src="imgs/circle_icon.png" alt="Simple Notes Logo" class="logo">
+            <h1>Register</h1>
+            <form id="register-form">
+                <input type="text" id="register-username" placeholder="User" required>
+                <input type="password" id="register-password" placeholder="Password" required>
+                <button type="submit">Register</button>
+            </form>
+            <p>Already have an account? <a href="#" id="show-login">Login</a></p>
+        </div>
+        <p id="auth-error" class="auth-error"></p>
+    </div>
+    <script src="auth.js"></script>
+</body>
+</html>

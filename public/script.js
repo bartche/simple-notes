@@ -1,13 +1,16 @@
 let currentEditingNoteId = null;
 let newNoteAttachments = [];
+let currentDraftNoteId = null; 
+let isUploading = false; 
 
+// ==============================================
+// FUNÇÕES GLOBAIS DO APP
+// ==============================================
 function applyInlineFormatting(text) {
   let formattedText = text;
   formattedText = formattedText.replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
   formattedText = formattedText.replace(/(?<!href=")(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>');
-  formattedText = formattedText.replace(/\*(.*?)\*/g, '<strong>$1</strong>')
-                               .replace(/_(.*?)_/g, '<em>$1</em>')
-                               .replace(/~(.*?)~/g, '<del>$1</del>');
+  formattedText = formattedText.replace(/\*(.*?)\*/g, '<strong>$1</strong>').replace(/_(.*?)_/g, '<em>$1</em>').replace(/~(.*?)~/g, '<del>$1</del>');
   return formattedText;
 }
 
@@ -29,20 +32,15 @@ function formatNoteContent(content, noteId) {
             return;
         }
         if (!line.trim().startsWith('- ') && !line.match(/^\d+\-\s/)) {
-            if (inList) {
-                newLines.push(inList === 'ol' ? '</ol>' : '</ul>');
-                inList = null;
-            }
+            if (inList) newLines.push(inList === 'ol' ? '</ol>' : '</ul>');
+            inList = null;
         }
         let processedLine;
-        if (line.match(/^-\s\[x\]\s/i)) {
-            processedLine = `<div class="task-list-item checked"><input type="checkbox" data-note-id="${noteId}" data-line-index="${index}" checked> <label>${applyInlineFormatting(line.substring(6))}</label></div>`;
-        } else if (line.match(/^-\s\[\s\]\s/)) {
-            processedLine = `<div class="task-list-item"><input type="checkbox" data-note-id="${noteId}" data-line-index="${index}"> <label>${applyInlineFormatting(line.substring(6))}</label></div>`;
-        }
-        else if (line.startsWith('# ')) { processedLine = `<h1>${applyInlineFormatting(line.substring(2))}</h1>`; }
-        else if (line.startsWith('## ')) { processedLine = `<h2>${applyInlineFormatting(line.substring(3))}</h2>`; }
-        else if (line.startsWith('### ')) { processedLine = `<h3>${applyInlineFormatting(line.substring(4))}</h3>`; }
+        if (line.match(/^-\s\[x\]\s/i)) processedLine = `<div class="task-list-item checked"><input type="checkbox" data-note-id="${noteId}" data-line-index="${index}" checked> <label>${applyInlineFormatting(line.substring(6))}</label></div>`;
+        else if (line.match(/^-\s\[\s\]\s/)) processedLine = `<div class="task-list-item"><input type="checkbox" data-note-id="${noteId}" data-line-index="${index}"> <label>${applyInlineFormatting(line.substring(6))}</label></div>`;
+        else if (line.startsWith('# ')) processedLine = `<h1>${applyInlineFormatting(line.substring(2))}</h1>`;
+        else if (line.startsWith('## ')) processedLine = `<h2>${applyInlineFormatting(line.substring(3))}</h2>`;
+        else if (line.startsWith('### ')) processedLine = `<h3>${applyInlineFormatting(line.substring(4))}</h3>`;
         else if (line.startsWith('- ')) {
             if (inList !== 'ul') {
                 if (inList) newLines.push('</ol>');
@@ -61,39 +59,29 @@ function formatNoteContent(content, noteId) {
             newLines.push(`<li>${applyInlineFormatting(line.replace(/^\d+\-\s/, ''))}</li>`);
             return;
         }
-        else if (line.trim()) {
-            processedLine = `<p>${applyInlineFormatting(line)}</p>`;
-        } else {
-            processedLine = '<br>';
-        }
+        else if (line.trim()) processedLine = `<p>${applyInlineFormatting(line)}</p>`;
+        else processedLine = '<br>';
         newLines.push(processedLine);
     });
-    if (inList) {
-        newLines.push(inList === 'ol' ? '</ol>' : '</ul>');
-    }
+    if (inList) newLines.push(inList === 'ol' ? '</ol>' : '</ul>');
     return newLines.join('\n');
 }
 
 function insertSyntax(prefix, suffix = '') {
-    const textarea = document.activeElement;
-    if (textarea.tagName !== 'TEXTAREA') {
-        const mainTextarea = document.getElementById('newNoteContent');
-        if(mainTextarea) mainTextarea.focus();
-        else return;
-    }
-    const targetTextarea = document.activeElement;
-    const start = targetTextarea.selectionStart;
-    const end = targetTextarea.selectionEnd;
-    const selectedText = targetTextarea.value.substring(start, end);
+    const textarea = document.getElementById('newNoteContent');
+    if (!textarea) return;
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const selectedText = textarea.value.substring(start, end);
     const textToInsert = prefix + selectedText + suffix;
-    targetTextarea.value = targetTextarea.value.substring(0, start) + textToInsert + targetTextarea.value.substring(end);
+    textarea.value = textarea.value.substring(0, start) + textToInsert + textarea.value.substring(end);
     if (selectedText) {
-        targetTextarea.selectionStart = start;
-        targetTextarea.selectionEnd = start + textToInsert.length;
+        textarea.selectionStart = start;
+        textarea.selectionEnd = start + textToInsert.length;
     } else {
-        targetTextarea.selectionStart = targetTextarea.selectionEnd = start + prefix.length;
+        textarea.selectionStart = textarea.selectionEnd = start + prefix.length;
     }
-    targetTextarea.focus();
+    textarea.focus();
 }
 
 function handleListContinuation(event) {
@@ -106,17 +94,13 @@ function handleListContinuation(event) {
         let prefix = '';
         const unorderedMatch = currentLine.match(/^(\s*-\s(?:\[[ x]\]\s)?)/);
         if (unorderedMatch) {
-            if (currentLine.trim() === unorderedMatch[1].trim()) {
-                prefix = '\n'; 
-            } else {
-                prefix = unorderedMatch[1].replace('[x]', '[ ]'); 
-            }
+            if (currentLine.trim() === unorderedMatch[1].trim()) prefix = '\n'; 
+            else prefix = unorderedMatch[1].replace('[x]', '[ ]'); 
         }
         const orderedMatch = currentLine.match(/^(\s*)(\d+)(\-\s)/);
         if (orderedMatch) {
-            if (currentLine.trim() === `${orderedMatch[2]}${orderedMatch[3]}`.trim()) {
-                 prefix = '\n'; 
-            } else {
+            if (currentLine.trim() === `${orderedMatch[2]}${orderedMatch[3]}`.trim()) prefix = '\n'; 
+            else {
                 const newNumber = parseInt(orderedMatch[2]) + 1;
                 prefix = `${orderedMatch[1]}${newNumber}${orderedMatch[3]}`;
             }
@@ -131,146 +115,6 @@ function handleListContinuation(event) {
     }
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-
-  // --- LÓGICA DE SERVICE WORKER (Correta) ---
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('/service-worker.js')
-        .then((registration) => {
-          console.log('Service Worker registrado com sucesso:', registration);
-        })
-        .catch((error) => {
-          console.log('Falha ao registrar o Service Worker:', error);
-        });
-    });
-  }
-
-  // --- LÓGICA DE TEMA (Correta) ---
-  const themeToggle = document.getElementById('theme-checkbox');
-  const applyTheme = (theme) => {
-    if (theme === 'dark') {
-      document.body.classList.add('dark-mode');
-      themeToggle.checked = true;
-    } else {
-      document.body.classList.remove('dark-mode');
-      themeToggle.checked = false;
-    }
-  };
-  themeToggle.addEventListener('change', () => {
-    const newTheme = themeToggle.checked ? 'dark' : 'light';
-    localStorage.setItem('theme', newTheme);
-    applyTheme(newTheme);
-  });
-  const savedTheme = localStorage.getItem('theme') || 'dark';
-  applyTheme(savedTheme);
-  
-  // --- INICIALIZAÇÃO E LISTENERS PRINCIPAIS (Corretos) ---
-  loadNotes();
-  setupLiveUpdate();
-  document.getElementById('saveNoteBtn').addEventListener('click', saveNewNote);
-  document.getElementById('fileUpload').addEventListener('change', handleNewAttachment);
-  document.getElementById('newNoteContent').addEventListener('keydown', handleListContinuation);
-  
-  // ==========================================================
-  // --- LÓGICA DE MENUS REFEITA E CORRIGIDA ---
-  // ==========================================================
-  
-  // Seletores dos menus
-  const syntaxHelperContainer = document.querySelector('.syntax-helper-container');
-  const syntaxBtn = document.getElementById('syntaxHelperBtn');
-  const mainDropdown = document.getElementById('syntaxDropdown');
-  const notesListContainer = document.getElementById('notesList');
-
-  // Funções para fechar os menus
-  const closeAllSubmenus = () => document.querySelectorAll('.syntax-submenu').forEach(m => m.classList.remove('show'));
-  const closeAllNoteActionMenus = () => document.querySelectorAll('.note-actions-menu.show').forEach(m => m.classList.remove('show'));
-
-  // Listener para o menu de sintaxe
-  syntaxBtn.addEventListener('click', (event) => {
-    event.stopPropagation();
-    closeAllNoteActionMenus(); // Fecha o outro tipo de menu
-    mainDropdown.classList.toggle('show');
-    if (!mainDropdown.classList.contains('show')) {
-      closeAllSubmenus();
-    }
-  });
-
-  // Lida com o mouseover para mostrar submenus de sintaxe
-  mainDropdown.addEventListener('mouseover', (event) => {
-    const option = event.target.closest('[data-target-submenu]');
-    if (option) {
-      const submenuId = option.dataset.targetSubmenu;
-      const submenu = document.getElementById(submenuId);
-      if (submenu && !submenu.classList.contains('show')) {
-        closeAllSubmenus();
-        submenu.style.left = `${mainDropdown.offsetWidth - 1}px`;
-        submenu.style.top = `${option.offsetTop - mainDropdown.scrollTop}px`;
-        submenu.classList.add('show');
-      }
-    } else if (event.target.closest('.syntax-option')) {
-      closeAllSubmenus();
-    }
-  });
-
-  // Listener para o clique em uma opção de sintaxe
-  syntaxHelperContainer.addEventListener('click', (event) => {
-    const option = event.target.closest('.syntax-option');
-    if (option && !option.hasAttribute('data-target-submenu')) {
-      insertSyntax(option.dataset.prefix || '', option.dataset.suffix || '');
-      mainDropdown.classList.remove('show');
-      closeAllSubmenus();
-    }
-  });
-
-  // Listener principal para as ações nos cards de nota (usando delegação)
-  notesListContainer.addEventListener('click', (event) => {
-    const target = event.target;
-    
-    // Clicou no gatilho do menu de ações (...) de uma nota
-    const actionTrigger = target.closest('.note-actions-trigger');
-    if (actionTrigger) {
-      event.stopPropagation();
-      const menu = actionTrigger.nextElementSibling;
-      const isShowing = menu.classList.contains('show');
-      closeAllNoteActionMenus(); // Fecha outros menus de nota
-      mainDropdown.classList.remove('show'); // Fecha o menu de sintaxe
-      closeAllSubmenus();
-      if (!isShowing) {
-        menu.classList.add('show');
-      }
-      return;
-    }
-    
-    // Clicou em uma opção do menu de ações (Editar/Apagar)
-    const menuOption = target.closest('.note-menu-option');
-    if (menuOption) {
-      const noteId = menuOption.dataset.id;
-      const action = menuOption.dataset.action;
-      if (action === 'edit') openEditMode(noteId);
-      if (action === 'delete') deleteNote(noteId);
-      closeAllNoteActionMenus();
-      return;
-    }
-
-    // Clicou em um checkbox de tarefa
-    const taskCheckbox = target.closest('.task-list-item input[type="checkbox"]');
-    if (taskCheckbox) {
-      handleTaskCheck(event);
-    }
-  });
-
-  // Listener global para fechar menus ao clicar fora
-  window.addEventListener('click', (event) => {
-    // Se o clique não foi em nenhum dos containers de menu, fecha tudo
-    if (!event.target.closest('.syntax-helper-container') && !event.target.closest('.note-actions')) {
-      mainDropdown.classList.remove('show');
-      closeAllSubmenus();
-      closeAllNoteActionMenus();
-    }
-  });
-});
-
 async function handleTaskCheck(event) {
     const checkbox = event.target;
     const noteId = checkbox.dataset.noteId;
@@ -280,11 +124,8 @@ async function handleTaskCheck(event) {
     const rawContent = noteCard.dataset.rawContent;
     const lines = rawContent.split('\n');
     if (lines[lineIndex]) {
-        if (checkbox.checked) {
-            lines[lineIndex] = lines[lineIndex].replace(/-\s\[\s\]/, '- [x]');
-        } else {
-            lines[lineIndex] = lines[lineIndex].replace(/-\s\[x\]/i, '- [ ]');
-        }
+        if (checkbox.checked) lines[lineIndex] = lines[lineIndex].replace(/-\s\[\s\]/, '- [x]');
+        else lines[lineIndex] = lines[lineIndex].replace(/-\s\[x\]/i, '- [ ]');
         const newContent = lines.join('\n');
         noteCard.dataset.rawContent = newContent;
         try {
@@ -295,13 +136,110 @@ async function handleTaskCheck(event) {
             });
         } catch (error) {
             console.error('Erro ao atualizar a tarefa:', error);
-            alert('Erro ao salvar o estado da tarefa.');
         }
     }
 }
+
+async function getOrCreateDraftNoteId() {
+    // Se já temos um ID para a nota atual, apenas o retornamos
+    if (currentDraftNoteId) {
+        return currentDraftNoteId;
+    }
+
+    try {
+        // Cria uma nova nota sem conteúdo para funcionar como rascunho
+        const response = await fetch('/api/notes', { 
+            method: 'POST', 
+            headers: { 'Content-Type': 'application/json' }, 
+            body: JSON.stringify({ content: '' }) // Envia conteúdo vazio
+        });
+        if (!response.ok) throw new Error('Falha ao criar nota rascunho');
+        
+        const noteData = await response.json();
+        currentDraftNoteId = noteData.id; // Armazena o novo ID globalmente
+        console.log(`Nota rascunho criada com ID: ${currentDraftNoteId}`);
+        return currentDraftNoteId;
+    } catch (error) {
+        console.error(error);
+        showToast('Unable to create or update note. Verify your connection.', 'error');
+        return null;
+    }
+}
+
+async function handleFiles(files) {
+    const saveBtn = document.getElementById('saveNoteBtn');
+    
+    // Inicia o processo de upload
+    isUploading = true;
+    saveBtn.disabled = true;
+    saveBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Upload...`;
+
+    const fileList = Array.from(files);
+    const attachmentObjects = fileList.map(file => {
+        const randomPart = Math.random().toString(36).substring(2, 11);
+        const uniqueId = `preview-${Date.now()}-${randomPart}`;
+        return { file, id: uniqueId, status: 'uploading', dbId: null };
+    });
+    newNoteAttachments.push(...attachmentObjects);
+    renderNewAttachmentsPreview();
+
+    try {
+        const noteId = await getOrCreateDraftNoteId();
+        if (!noteId) throw new Error("Não foi possível obter um ID para a nota rascunho.");
+
+        const uploadPromises = attachmentObjects.map(obj => uploadAttachment(noteId, obj));
+        await Promise.all(uploadPromises);
+
+    } catch (error) {
+        console.error("Erro no processo de upload:", error);
+        showToast("Unable to upload one or more files. Try again.", "error");
+    } finally {
+        // Ao final de todos os uploads (com sucesso ou falha), reabilita o botão
+        isUploading = false;
+        saveBtn.disabled = false;
+        saveBtn.innerHTML = `<i class="fas fa-save"></i> Salvar Nota`;
+    }
+}
+
+async function uploadAttachment(noteId, attachmentObject) {
+    const { file, id } = attachmentObject;
+    const statusContainer = document.querySelector(`#${id} .attachment-status`);
+
+    try {
+        if (statusContainer) statusContainer.innerHTML = `<i class="fas fa-spinner fa-spin"></i>`;
+        
+        const formData = new FormData();
+        formData.append('files', file);
+
+        const response = await fetch(`/api/notes/${noteId}/attachments`, {
+            method: 'POST',
+            body: formData
+        });
+        if (!response.ok) throw new Error(await response.text());
+
+        const result = await response.json();
+        const createdAttachment = result.attachments[0]; // Pega o primeiro anexo retornado
+
+        attachmentObject.status = 'success';
+        attachmentObject.dbId = createdAttachment.id; // Armazena o ID do banco de dados
+        
+        // Atualiza a UI para refletir o sucesso e armazena o dbId no botão de apagar
+        if (statusContainer) {
+            statusContainer.innerHTML = `<i class="fas fa-check-circle success-icon"></i>`;
+            const deleteBtn = document.querySelector(`#${id} .delete-attachment`);
+            if(deleteBtn) deleteBtn.dataset.dbId = createdAttachment.id;
+        }
+
+    } catch (error) {
+        attachmentObject.status = 'error';
+        if (statusContainer) statusContainer.innerHTML = `<i class="fas fa-exclamation-circle error-icon" title="${error.message || 'Erro'}"></i>`;
+    }
+}
+
 async function loadNotes() {
   try {
     const response = await fetch('/api/notes');
+    if (!response.ok) throw new Error('Falha ao carregar notas');
     const notes = await response.json();
     const notesWithAttachments = await Promise.all(notes.map(async note => {
       const attachmentsResponse = await fetch(`/api/notes/${note.id}/attachments`);
@@ -310,7 +248,7 @@ async function loadNotes() {
     }));
     renderNotes(notesWithAttachments);
   } catch (error) {
-    console.error('Erro ao carregar notas:', error);
+    console.error(error);
   }
 }
 
@@ -326,7 +264,6 @@ function renderNotes(notes) {
     noteCard.className = 'note-card';
     noteCard.dataset.noteId = note.id;
     noteCard.dataset.rawContent = note.content;
-
     noteCard.innerHTML = `
       <div class="note-content">${formatNoteContent(note.content, note.id)}</div>
       ${note.attachments.length > 0 ? `
@@ -336,32 +273,18 @@ function renderNotes(notes) {
         </div>
       ` : ''}
       <div class="note-meta">
-        ${
-          note.updated_at
-            ? `<span title="Created: ${formatDateTime(note.created_at)}">Updated: ${formatDateTime(note.updated_at)}</span>`
-            : `<span>Created: ${formatDateTime(note.created_at)}</span>`
-        }
+        ${note.updated_at ? `<span title="Created at: ${formatDateTime(note.created_at)}">Updated at: ${formatDateTime(note.updated_at)}</span>` : `<span>Created at: ${formatDateTime(note.created_at)}</span>`}
       </div>
-
       <div class="note-actions">
-        <button class="note-action-btn note-actions-trigger" title="Mais opções">
-            <i class="fas fa-ellipsis-v"></i>
-        </button>
+        <button class="note-action-btn note-actions-trigger" title="Mais opções"><i class="fas fa-ellipsis-v"></i></button>
         <div class="note-actions-menu">
-            <div class="note-menu-option" data-action="edit" data-id="${note.id}">
-                <i class="fas fa-edit"></i> Edit
-            </div>
-            <div class="note-menu-option note-menu-option-delete" data-action="delete" data-id="${note.id}">
-                <i class="fas fa-trash-alt"></i> Delete
-            </div>
+            <div class="note-menu-option" data-action="edit" data-id="${note.id}"><i class="fas fa-edit"></i> Editar</div>
+            <div class="note-menu-option note-menu-option-delete" data-action="delete" data-id="${note.id}"><i class="fas fa-trash-alt"></i> Apagar</div>
         </div>
       </div>
     `;
     container.appendChild(noteCard);
   });
-
-  // O listener de eventos agora é único e está no container principal,
-  // então não é mais necessário adicionar listeners individuais aqui.
 }
 function formatDateTime(dateString) {
   const date = new Date(dateString);
@@ -373,86 +296,183 @@ function renderAttachmentsForNote(attachments) {
       <div class="attachment-icon"><i class="fas fa-file"></i></div>
       <div class="attachment-name" title="${attachment.originalname}">${attachment.originalname}</div>
       <div class="attachment-actions">
-        <a href="/api/attachments/download/${attachment.id}" download="${attachment.originalname}" class="download-attachment" title="Baixar"><i class="fas fa-download"></i></a>
-        <div class="delete-attachment" data-id="${attachment.id}" title="Excluir"><i class="fas fa-trash-alt"></i></div>
+        <a href="/api/attachments/download/${attachment.id}" download="${attachment.originalname}" class="download-attachment" title="Download"><i class="fas fa-download"></i></a>
+        <div class="delete-attachment" data-id="${attachment.id}" title="Delete"><i class="fas fa-trash-alt"></i></div>
       </div>
     </div>
   `).join('');
 }
+
 async function saveNewNote() {
-  const content = document.getElementById('newNoteContent').value.trim();
-  if (!content && newNoteAttachments.length === 0) {
-    alert('A nota não pode estar vazia!');
-    return;
-  }
-  try {
-    const response = await fetch('/api/notes', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ content }) });
-    if (!response.ok) throw new Error('Falha ao criar a nota');
-    const noteData = await response.json();
-    if (newNoteAttachments.length > 0) {
-      const uploadPromises = newNoteAttachments.map(file => uploadAttachmentForNote(noteData.id, file));
-      await Promise.all(uploadPromises);
+    // Impede o salvamento se um upload ainda estiver ocorrendo em segundo plano
+    if (isUploading) {
+        showToast('There are attachments still uploading...', 'info');
+        return;
     }
-    resetNewNoteForm();
-    loadNotes();
-  } catch (error) {
-    console.error('Erro ao salvar nota:', error);
-    alert(`Erro ao salvar nota: ${error.message}`);
-  }
+
+    const saveBtn = document.getElementById('saveNoteBtn');
+    const originalBtnText = saveBtn.innerHTML;
+    saveBtn.disabled = true;
+    saveBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Salvando...`;
+
+    try {
+        const content = document.getElementById('newNoteContent').value.trim();
+
+        if (currentDraftNoteId && !content && newNoteAttachments.length === 0) {
+            await checkAndDeleteEmptyDraft();
+            return;
+        }
+        if (!currentDraftNoteId && !content) {
+            showToast('The note cannot be empty!', 'info');
+            return;
+        }
+
+        let noteIdToUpdate = currentDraftNoteId;
+
+        if (!noteIdToUpdate) {
+            const response = await fetch('/api/notes', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ content })
+            });
+            if (!response.ok) throw new Error('Falha ao criar nota de texto.');
+            const noteData = await response.json();
+            noteIdToUpdate = noteData.id;
+        } else {
+            await fetch(`/api/notes/${noteIdToUpdate}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ content })
+            });
+        }
+        
+        resetNewNoteForm();
+        loadNotes();
+        showToast("Note created successfully!", "success");
+
+    } catch (error) {
+        console.error('Erro ao finalizar a nota:', error);
+        showToast('Unable to create note!', 'error');
+    } finally {
+        saveBtn.disabled = false;
+        saveBtn.innerHTML = originalBtnText;
+    }
 }
+
 function resetNewNoteForm() {
     document.getElementById('newNoteContent').value = '';
     newNoteAttachments = [];
     renderNewAttachmentsPreview();
+    currentDraftNoteId = null; // Limpa o ID do rascunho
 }
-function handleNewAttachment(event) {
-  const files = Array.from(event.target.files);
-  newNoteAttachments = newNoteAttachments.concat(files);
-  renderNewAttachmentsPreview();
-  event.target.value = '';
-}
+
 function renderNewAttachmentsPreview() {
   const container = document.getElementById('newAttachmentsPreview');
   container.innerHTML = '';
   if (newNoteAttachments.length === 0) return;
-  container.innerHTML = '<div class="attachments-title"><i class="fas fa-paperclip"></i> Anexos para upload:</div>';
+  
+  container.innerHTML = '<div class="attachments-title"><i class="fas fa-paperclip"></i> Attachments:</div>';
   const attachmentsList = document.createElement('div');
   attachmentsList.className = 'attachments-list';
-  newNoteAttachments.forEach((file, index) => {
+  
+  newNoteAttachments.forEach((attachmentObj) => {
+    const { file, id, status, dbId } = attachmentObj;
     const attachmentEl = document.createElement('div');
     attachmentEl.className = 'attachment-item';
+    attachmentEl.id = id;
+
+    let statusIcon = '';
+    if (status === 'uploading') statusIcon = `<i class="fas fa-spinner fa-spin"></i>`;
+    else if (status === 'success') statusIcon = `<i class="fas fa-check-circle success-icon"></i>`;
+    else if (status === 'error') statusIcon = `<i class="fas fa-exclamation-circle error-icon"></i>`;
+
     attachmentEl.innerHTML = `
       <div class="attachment-icon"><i class="fas fa-file"></i></div>
       <div class="attachment-name" title="${file.name}">${file.name}</div>
+      <div class="attachment-status">${statusIcon}</div>
       <div class="attachment-actions">
-        <div class="delete-attachment" data-index="${index}"><i class="fas fa-trash-alt"></i></div>
+        <div class="delete-attachment" data-preview-id="${id}" data-db-id="${dbId || ''}" title="Delete">
+          <i class="fas fa-trash-alt"></i>
+        </div>
       </div>
     `;
     attachmentsList.appendChild(attachmentEl);
   });
+  
   container.appendChild(attachmentsList);
+  
+  // Listener de clique MODIFICADO para apagar no servidor
   document.querySelectorAll('#newAttachmentsPreview .delete-attachment').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const index = parseInt(btn.getAttribute('data-index'));
-      newNoteAttachments.splice(index, 1);
-      renderNewAttachmentsPreview();
+    btn.addEventListener('click', async (event) => {
+        const button = event.currentTarget;
+        const previewId = button.dataset.previewId;
+        const dbId = button.dataset.dbId;
+
+        // Desabilita o botão para evitar cliques duplos
+        button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+
+        // Se o anexo já tiver um ID do banco, apaga no servidor
+        if (dbId) {
+            try {
+                const response = await fetch(`/api/attachments/${dbId}`, { method: 'DELETE' });
+                if (!response.ok) throw new Error('Falha ao apagar anexo no servidor.');
+            } catch (error) {
+                console.error(error);
+                showToast(error.message, 'error');
+                button.innerHTML = '<i class="fas fa-trash-alt"></i>'; // Restaura o ícone em caso de erro
+                return;
+            }
+        }
+
+        // Remove da lista local e re-renderiza a UI
+        newNoteAttachments = newNoteAttachments.filter(a => a.id !== previewId);
+        renderNewAttachmentsPreview();
+		
+		await checkAndDeleteEmptyDraft();
     });
   });
 }
-async function uploadAttachmentForNote(noteId, file) {
-  const formData = new FormData();
-  formData.append('files', file);
-  const response = await fetch(`/api/notes/${noteId}/attachments`, { method: 'POST', body: formData });
-  if (!response.ok) {
-    const error = await response.text();
-    throw new Error(`Falha no anexo ${file.name}: ${error}`);
-  }
-  return response.json();
-}
-function openEditMode(noteId) {
-    if (currentEditingNoteId && currentEditingNoteId !== noteId) {
-        cancelEditMode(currentEditingNoteId);
+
+async function uploadAttachmentForNote(noteId, attachmentObject) {
+    const { file, previewId } = attachmentObject;
+    const statusContainer = document.querySelector(`#${previewId} .attachment-status`);
+
+    try {
+        // Mostra o ícone de carregamento
+        if (statusContainer) {
+            statusContainer.innerHTML = `<i class="fas fa-spinner fa-spin"></i>`;
+        }
+
+        const formData = new FormData();
+        formData.append('files', file);
+
+        const response = await fetch(`/api/notes/${noteId}/attachments`, {
+            method: 'POST',
+            body: formData
+        });
+
+        if (!response.ok) {
+            throw new Error(await response.text());
+        }
+
+        // Mostra o ícone de sucesso
+        if (statusContainer) {
+            statusContainer.innerHTML = `<i class="fas fa-check-circle success-icon"></i>`;
+        }
+        return { success: true };
+
+    } catch (error) {
+        console.error(`Erro no upload de ${file.name}:`, error);
+        // Mostra o ícone de erro
+        if (statusContainer) {
+            statusContainer.innerHTML = `<i class="fas fa-exclamation-circle error-icon" title="${error.message || 'Erro desconhecido'}"></i>`;
+        }
+        return { success: false, error: error.message };
     }
+}
+
+function openEditMode(noteId) {
+    if (currentEditingNoteId && currentEditingNoteId !== noteId) cancelEditMode(currentEditingNoteId);
     const noteCard = document.querySelector(`.note-card[data-note-id='${noteId}']`);
     if (!noteCard) return;
     noteCard.classList.add('is-editing');
@@ -487,7 +507,6 @@ async function saveEditedNote(noteId) {
     loadNotes();
   } catch (error) {
     console.error('Erro ao salvar nota editada:', error);
-    alert('Erro ao salvar nota.');
   }
 }
 function cancelEditMode(noteId) {
@@ -495,25 +514,39 @@ function cancelEditMode(noteId) {
   currentEditingNoteId = null;
 }
 async function deleteNote(noteId) {
-  if (!confirm('Are you sure you want to delete this note and its attechments? IT IS NOT REVERSIBLE!')) return;
   try {
     await fetch(`/api/notes/${noteId}`, { method: 'DELETE' });
     loadNotes();
   } catch (error) {
     console.error('Erro ao excluir nota:', error);
-    alert('Erro ao excluir nota');
   }
 }
 async function deleteAttachment(attachmentId) {
-  if (!confirm('Tem certeza que deseja excluir este anexo?')) return;
   try {
     await fetch(`/api/attachments/${attachmentId}`, { method: 'DELETE' });
     loadNotes();
   } catch (error) {
     console.error('Erro ao excluir anexo:', error);
-    alert('Erro ao excluir anexo');
   }
 }
+
+// NOVA FUNÇÃO: Verifica se o rascunho atual está vazio e, se estiver, o apaga.
+async function checkAndDeleteEmptyDraft() {
+    if (!currentDraftNoteId) return; // Só executa se estivermos em um rascunho
+
+    const content = document.getElementById('newNoteContent').value.trim();
+    
+    if (content === '' && newNoteAttachments.length === 0) {
+        console.log(`Rascunho ${currentDraftNoteId} está vazio. Apagando...`);
+        try {
+            await fetch(`/api/notes/${currentDraftNoteId}`, { method: 'DELETE' });
+            resetNewNoteForm(); // Reseta o formulário, incluindo o currentDraftNoteId
+        } catch (error) {
+            console.error("Falha ao apagar o rascunho vazio:", error);
+        }
+    }
+}
+
 function setupLiveUpdate() {
   const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
   const ws = new WebSocket(`${protocol}//${window.location.host}`);
@@ -529,9 +562,210 @@ function setupLiveUpdate() {
 function showUpdateNotification() {
   const notification = document.createElement('div');
   notification.className = 'update-notification';
-  notification.innerHTML = `<i class="fas fa-sync-alt"></i><span>Notes updateded!</span>`;
+  notification.innerHTML = `<i class="fas fa-sync-alt"></i><span>Sync Successful!</span>`;
   document.body.appendChild(notification);
-  setTimeout(() => {
-    notification.remove();
-  }, 2000);
+  setTimeout(() => notification.remove(), 2000);
+}
+
+// NOVA FUNÇÃO para mostrar notificações elegantes
+function showToast(message, type = 'info') { // type pode ser 'success', 'error', ou 'info'
+    const container = document.getElementById('toast-container');
+    if (!container) return;
+
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+
+    let iconClass = 'fa-info-circle';
+    if (type === 'success') iconClass = 'fa-check-circle';
+    if (type === 'error') iconClass = 'fa-exclamation-triangle';
+
+    toast.innerHTML = `<i class="fas ${iconClass}"></i><p>${message}</p>`;
+    
+    container.appendChild(toast);
+
+    // Remove o toast após alguns segundos
+    setTimeout(() => {
+        toast.classList.add('fade-out');
+        toast.addEventListener('animationend', () => {
+            toast.remove();
+        });
+    }, 4000); // 4 segundos
+}
+
+function addFilesToQueue(files) {
+    const fileList = Array.from(files);
+    newNoteAttachments = newNoteAttachments.concat(fileList);
+    renderNewAttachmentsPreview();
+}
+
+// ==========================================================
+// PONTO DE ENTRADA DO SCRIPT
+// ==========================================================
+
+document.addEventListener('DOMContentLoaded', async () => {
+  // 1. Verifica o status de login
+  try {
+    const res = await fetch('/api/users/status');
+    if (!res.ok) {
+        window.location.href = '/login.html';
+        return;
+    }
+    const data = await res.json();
+    if (!data.loggedIn) {
+      window.location.href = '/login.html';
+      return;
+    }
+	
+	const userTheme = data.theme || 'dark';
+    localStorage.setItem('theme', userTheme); // Sincroniza o localStorage
+	
+    // 2. Apenas se o login for bem-sucedido, inicializa o aplicativo
+    initializeApp(data.username); 
+  } catch (error) {
+    console.error("Falha ao verificar status de login, redirecionando...", error);
+    window.location.href = '/login.html';
+  }
+});
+
+// Função que configura a página principal do aplicativo APÓS o login
+function initializeApp(username) {
+  document.getElementById('username-display').textContent = username;
+
+  const savedTheme = localStorage.getItem('theme') || 'dark';
+  document.body.classList.toggle('dark-mode', savedTheme === 'dark');
+
+  loadNotes();
+  setupLiveUpdate();
+  
+  document.getElementById('saveNoteBtn').addEventListener('click', saveNewNote);
+  // Modificado para usar a nova função handleFiles
+  document.getElementById('fileUpload').addEventListener('change', (e) => handleFiles(e.target.files)); 
+  document.getElementById('newNoteContent').addEventListener('keydown', handleListContinuation);
+  
+  // Lógica de Drag and Drop
+  const newNoteTextarea = document.getElementById('newNoteContent');
+  newNoteTextarea.addEventListener('dragover', (event) => {
+    event.preventDefault();
+    newNoteTextarea.classList.add('is-dragging-over');
+  });
+  newNoteTextarea.addEventListener('dragleave', () => {
+    newNoteTextarea.classList.remove('is-dragging-over');
+  });
+  newNoteTextarea.addEventListener('drop', (event) => {
+    event.preventDefault();
+    newNoteTextarea.classList.remove('is-dragging-over');
+    if (event.dataTransfer.files.length > 0) {
+      handleFiles(event.dataTransfer.files); // Usa a mesma função
+    }
+  });
+  
+  // Lógica dos Menus
+  const syntaxHelperContainer = document.querySelector('.syntax-helper-container');
+  const syntaxBtn = document.getElementById('syntaxHelperBtn');
+  const mainDropdown = document.getElementById('syntaxDropdown');
+  const notesListContainer = document.getElementById('notesList');
+
+  const hideAllSubmenus = () => document.querySelectorAll('.syntax-submenu').forEach(m => m.classList.remove('show'));
+  const closeAllNoteActionMenus = () => document.querySelectorAll('.note-actions-menu.show').forEach(menu => menu.classList.remove('show'));
+
+  syntaxBtn.addEventListener('click', (event) => {
+    event.stopPropagation();
+    closeAllNoteActionMenus();
+    mainDropdown.classList.toggle('show');
+    if (!mainDropdown.classList.contains('show')) hideAllSubmenus();
+  });
+  
+  mainDropdown.addEventListener('mouseover', (event) => {
+    const option = event.target.closest('[data-target-submenu]');
+    if (option) {
+      const submenuId = option.dataset.targetSubmenu;
+      const submenu = document.getElementById(submenuId);
+      if (submenu && !submenu.classList.contains('show')) {
+        hideAllSubmenus();
+        submenu.style.left = `${mainDropdown.offsetWidth - 1}px`;
+        submenu.style.top = `${option.offsetTop - mainDropdown.scrollTop}px`;
+        submenu.classList.add('show');
+      }
+    } else if (event.target.closest('.syntax-option')) {
+      hideAllSubmenus();
+    }
+  });
+
+  syntaxHelperContainer.addEventListener('click', (event) => {
+    const option = event.target.closest('.syntax-option');
+    if (option && !option.hasAttribute('data-target-submenu')) {
+      insertSyntax(option.dataset.prefix || '', option.dataset.suffix || '');
+      mainDropdown.classList.remove('show');
+      hideAllSubmenus();
+    }
+  });
+  
+  syntaxHelperContainer.addEventListener('mouseleave', () => hideAllSubmenus());
+
+  notesListContainer.addEventListener('click', async (event) => {
+    const target = event.target;
+    const actionTrigger = target.closest('.note-actions-trigger');
+    if (actionTrigger) {
+      event.stopPropagation();
+      const menu = actionTrigger.nextElementSibling;
+      const isShowing = menu.classList.contains('show');
+      closeAllNoteActionMenus();
+      mainDropdown.classList.remove('show');
+      hideAllSubmenus();
+      if (!isShowing) menu.classList.add('show');
+      return;
+    }
+    
+    const menuOption = target.closest('.note-menu-option');
+    if (menuOption) {
+      const noteId = menuOption.dataset.id;
+      const action = menuOption.dataset.action;
+      if (action === 'edit') openEditMode(noteId);
+      if (action === 'delete') await deleteNote(noteId);
+      closeAllNoteActionMenus();
+      return;
+    }
+
+    const taskCheckbox = target.closest('.task-list-item input[type="checkbox"]');
+    if (taskCheckbox) {
+      await handleTaskCheck(event);
+	  return;
+    }
+	
+	const deleteSavedAttachmentBtn = target.closest('.note-card.is-editing .delete-attachment');
+    if (deleteSavedAttachmentBtn) {
+        const attachmentId = deleteSavedAttachmentBtn.dataset.id;
+        if (confirm('Tem certeza que deseja apagar este anexo?')) {
+            try {
+                const response = await fetch(`/api/attachments/${attachmentId}`, { method: 'DELETE' });
+                if (!response.ok) throw new Error('Falha ao apagar anexo no servidor.');
+                
+                const noteCard = deleteSavedAttachmentBtn.closest('.note-card');
+                deleteSavedAttachmentBtn.closest('.attachment-item').remove();
+                
+                // Verifica se a nota ficou vazia
+                const remainingAttachments = noteCard.querySelectorAll('.attachment-item').length;
+                const editorText = noteCard.querySelector('.edit-textarea').value.trim();
+
+                if (remainingAttachments === 0 && editorText === '') {
+                    console.log(`Nota ${noteCard.dataset.noteId} ficou vazia. Apagando...`);
+                    await deleteNote(noteCard.dataset.noteId);
+                }
+            } catch (error) {
+                console.error(error);
+                showToast(error.message, 'error');
+            }
+        }
+    }
+  });
+
+  window.addEventListener('click', (event) => {
+    if (!event.target.closest('.syntax-helper-container')) {
+      mainDropdown.classList.remove('show');
+      hideAllSubmenus();
+    }
+    if (!event.target.closest('.note-actions')) {
+      closeAllNoteActionMenus();
+    }
+  });
 }
