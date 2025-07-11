@@ -10,11 +10,11 @@ A simple, secure, and real-time note-taking web application. Built with Node.js,
 <table align="center">
   <tr align="center">
     <td align="center" valign="top">
-      <img src="./exemples/nothing-black.png" alt="Dark Themed App" width="320">
+      <img src="./exemples/note-exemple.png" alt="Note Exemple" width="320">
     </td><td align="center" valign="top">
       <img src="./exemples/nothing-white.png" alt="White Themed App" width="320">
     </td><td align="center" valign="top">
-      <img src="./exemples/note-exemple.png" alt="Note Exemple" width="320">
+      <img src="./exemples/user-profile.png" alt="User Profile" width="320">
     </td>
   </tr>
 </table>
