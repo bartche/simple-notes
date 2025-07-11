@@ -93,6 +93,9 @@ app.post('/api/users/register', async (req, res) => {
     if (!username || !password) {
         return res.status(400).json({ message: 'Username and password are required.' });
     }
+	if (username.length < 4 || password.length < 4) {
+        return res.status(400).json({ message: 'Username and password must be at least 4 characters long.' });
+    }
     try {
         const allowRegistrations = await db.getSetting('allow_registrations');
         const userCount = await db.getUserCount();
