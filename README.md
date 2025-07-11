@@ -40,6 +40,8 @@ Simple Notes was created to be a straightforward, self-hosted solution for takin
   * 📎 **File Attachments**: Securely attach any file to your notes.
   * ✍️ **Markdown Syntax Helper**: A quick guide for formatting your text with headers, bold, italics, strikethrough, checkboxes, lists, urls and code blocks.
   * 📝 **Full Note Management**: Easily create, edit, and delete your notes.
+  * 🧾 **Login System**: Simple user authentication with preferences saved for each user.
+  * 🎭 **User Profile**: Profile page for user managment and a dedicated panel for administrators to manage the application and its users.
   * 🚀 **Self-Hosted**: You have full control over your data on your own server.
 
 -----
